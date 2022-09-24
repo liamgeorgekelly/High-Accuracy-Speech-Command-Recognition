@@ -7,9 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from scipy.io import wavfile 
 from scipy.fft import fft, fftfreq
-import librosa
 import os
 import pyaudio
 
@@ -222,7 +220,7 @@ if recorded:
 
         # Load model and transformers:
         CNN_model.load_weights('models/CNN_weights')
-        le = pickle.load(open('models/label_encoder.sav', 'rb'))
+        le = pickle.load(open('models/label_encoder_cnn.sav', 'rb'))
 
     
         # Predict values and record confidence:

@@ -7,9 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from scipy.io import wavfile 
 from scipy.fft import fft, fftfreq
-import librosa
 import os
 import pyaudio
 
@@ -27,7 +25,7 @@ audio_len = s_rate*3 # Length of audio recording
 
 with header:
     st.title("Speech Recognition Project")
-    st.markdown('#### Logistic Regression Model')
+    st.markdown('#### XGBoost Model')
     st.markdown('By Liam Kelly')
     st.markdown("---")
 
@@ -110,7 +108,6 @@ if recorded:
         x_hat = abs(x)/np.sum(abs(x))
         
         ### Calculate Time-Domain Features ###
-        
         # 1. Calculate the temporal bandwidth:
         temp_cent = np.sum(t*x_hat) # Temporal centroid
         temp_bw = np.sqrt(np.sum(((t - temp_cent)**2)*x_hat))
@@ -176,7 +173,7 @@ if recorded:
         indices = np.where(np.cumsum(X_hat**2) > 0.95*tot_energy)
         df.loc[i, 'spectral_rolloff'] = min(f_mel[indices])  
 
-        # Show dataframe header
+        # Save the dataframe post feature extraction:
         df_extract = df
 
         ###########################
@@ -199,10 +196,10 @@ if recorded:
         
         X = df
 
-        log_model = pickle.load(open('models/log_model.sav', 'rb'))
-        scaler = pickle.load(open('models/scaler.sav', 'rb'))
-        pred_val = log_model.predict(scaler.transform(X))[0]
-        pred_prob = log_model.predict_proba(scaler.transform(X)).max()*100
+        xgb_model = pickle.load(open('models/xgb_model.sav', 'rb'))
+        le = pickle.load(open('models/label_encoder.sav', 'rb'))
+        pred_val = le.inverse_transform(xgb_model.predict(X))[0]
+        pred_prob = xgb_model.predict_proba(X).max()*100
         st.header('Predicted Value: %s' % pred_val)
         st.subheader('Confidence = %.1f %%' % pred_prob) 
         st.write(' ')
