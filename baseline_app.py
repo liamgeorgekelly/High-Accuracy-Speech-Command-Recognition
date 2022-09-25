@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import pickle
 from scipy.fft import fft, fftfreq
 import os
+import plotly.express as px
 import pyaudio
 
 # Initialize sections in the app:
@@ -199,16 +200,34 @@ if recorded:
         xgb_model = pickle.load(open('models/xgb_model.sav', 'rb'))
         le = pickle.load(open('models/label_encoder.sav', 'rb'))
         pred_val = le.inverse_transform(xgb_model.predict(X))[0]
-        pred_prob = xgb_model.predict_proba(X).max()*100
+        pred_prob = xgb_model.predict_proba(X)*100
         st.header('Predicted Value: %s' % pred_val)
-        st.subheader('Confidence = %.1f %%' % pred_prob) 
+        st.subheader('Confidence = %.1f %%' % pred_prob.max()) 
         st.write(' ')
 
     with features:
         
-        with st.expander('Click to View Features of Recorded Audio Sample'):
-            st.text('Data post feature extraction:')
-            st.write(df_extract)
+        with st.expander('Click to View Additional Details'):
+            st.header('Confidence Values')
+            # Create a variable of all possible words:
+            y_val = le.inverse_transform(np.arange(8))
 
-            st.text('Data post transformation:')
-            st.write(df)
+            # Graph a polar plot of the models confidence in each word:
+            st.write('Polar Plot of Confidence Values for Each Word:')
+            fig_polar = px.line_polar(r=pred_prob[0], theta=y_val, line_close=True)
+            fig_polar.update_traces(fill='toself')
+            st.write(fig_polar)
+
+            # Bar plot of the model's confidence in each word:
+            fig_bar = px.bar(x=y_val, y=pred_prob[0])
+            fig_bar.update_layout(title='Bar Plot of Confidence Values for Each Word',
+                      xaxis_title='Spoken Word', yaxis_title='Confidence (%)')
+            st.write(fig_bar)
+
+            
+            # Display the original Audio Sample
+            st.header('Calculated Audio Features')
+
+            for col in  df_extract.columns:
+                st.write('%s: %.3f' % (col.replace('_',' '), df_extract.loc[0,col]))
+

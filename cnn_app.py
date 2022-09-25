@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import pickle
 from scipy.fft import fft, fftfreq
 import os
+import plotly.express as px
 import pyaudio
 
 
@@ -237,18 +238,25 @@ if recorded:
     with additional_info:
         
         with st.expander('Click to View Additional Details'):
-            
-            # Create a table which contains the model's confidence for all words:
+            st.header('Confidence Values')
+            # Create a variable of all possible words:
             y_val = le.inverse_transform(np.arange(8))
-            df_pred = pd.DataFrame(data = pred, columns = y_val).round(3)
-            df_pred.index = ['Confidence (%)']
 
-            # Display the table:
-            st.write('Confidence Values for Each Word:')
-            st.write(df_pred)
+            # Graph a polar plot of the models confidence in each word:
+            st.write('Polar Plot of Confidence Values for Each Word:')
+            fig_polar = px.line_polar(r=pred[0], theta=y_val, line_close=True)
+            fig_polar.update_traces(fill='toself')
+            st.write(fig_polar)
 
+            # Bar plot of the model's confidence in each word:
+            fig_bar = px.bar(x=y_val, y=pred[0])
+            fig_bar.update_layout(title='Bar Plot of Confidence Values for Each Word',
+                      xaxis_title='Spoken Word', yaxis_title='Confidence (%)')
+            st.write(fig_bar)
+
+            
             # Display the original Audio Sample
-            # Plot the collected audio sample
+            st.header('Original Audio Sample')
             fig_og = plt.figure()
             plt.plot(t,x)
             plt.title("Recorded Audio Sample")
