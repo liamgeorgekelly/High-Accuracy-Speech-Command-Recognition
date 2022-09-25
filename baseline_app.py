@@ -46,6 +46,8 @@ with data_collection:
         col_4.write('yes')
         col_4.write('no')
 
+    conf_thres = st.number_input(label='Minimum Confidence (%)',min_value=0.00, max_value=99.99,value = 99.90, format="%.2f")
+
     ################################
     ### Collect the Audio Sample ###
     ################################
@@ -197,13 +199,27 @@ if recorded:
         
         X = df
 
+        # Load the models:
         xgb_model = pickle.load(open('models/xgb_model.sav', 'rb'))
         le = pickle.load(open('models/label_encoder.sav', 'rb'))
+
+        # Use the model to predict the spoken word:
         pred_val = le.inverse_transform(xgb_model.predict(X))[0]
         pred_prob = xgb_model.predict_proba(X)*100
-        st.header('Predicted Value: %s' % pred_val)
-        st.subheader('Confidence = %.1f %%' % pred_prob.max()) 
-        st.write(' ')
+        conf = pred_prob.max()
+
+        # Print the outcome:
+        # If the confidence is above the specified threshold, then success:
+        if conf > conf_thres:
+
+            st.header('Success! You said: %s' % pred_val)
+            st.write('Confidence = %.1f %%' % conf) 
+
+        # If the confidence is below the specified threshold, then failure:
+        else:
+
+            st.header('Failure! We thought you said: %s, but are uncertain' % pred_val)
+            st.write('Confidence = %.1f %%' % conf) 
 
     with features:
         

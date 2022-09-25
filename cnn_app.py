@@ -47,6 +47,9 @@ with data_collection:
         col_4.write('yes')
         col_4.write('no')
 
+    # Specifiy the minimum confidence threshold for a word to be accepted:
+    conf_thres = st.number_input(label='Minimum Confidence (%)',min_value=0.00, max_value=99.99,value = 99.90, format="%.2f")
+
     ################################
     ### Collect the Audio Sample ###
     ################################
@@ -228,12 +231,20 @@ if recorded:
         pred = CNN_model.predict(X)*100
         conf = pred.max()
         pred_i = np.array([np.argmax(pred)])
-        pred_val = le.inverse_transform(pred_i)
+        pred_val = le.inverse_transform(pred_i)[0]
 
         # Print the results:
-        st.header('Predicted Value: %s' % pred_val[0])
-        st.subheader('Confidence = %.3f %%' % conf) 
-        st.write(' ')
+        # If the confidence is above the specified threshold, then success:
+        if conf > conf_thres:
+
+            st.header('Success! You said: %s' % pred_val)
+            st.write('Confidence = %.1f %%' % conf) 
+
+        # If the confidence is below the specified threshold, then failure:
+        else:
+
+            st.header('Failure! We thought you said: %s, but are uncertain' % pred_val)
+            st.write('Confidence = %.1f %%' % conf) 
 
     with additional_info:
         
