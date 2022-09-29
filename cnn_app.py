@@ -26,9 +26,8 @@ audio_len = s_rate*3 # Length of audio recording
 
 
 with header:
-    st.title("Speech Recognition Project")
-    st.markdown('#### CNN Model')
-    st.markdown('By Liam Kelly')
+    st.title("Speech Recognition Application")
+    st.markdown('Liam Kelly')
     st.markdown("---")
 
 with data_collection:
@@ -238,13 +237,13 @@ if recorded:
         if conf > conf_thres:
 
             st.header('Success! You said: %s' % pred_val)
-            st.write('Confidence = %.1f %%' % conf) 
+            st.write('Confidence = %.2f %%' % conf) 
 
         # If the confidence is below the specified threshold, then failure:
         else:
 
             st.header('Failure! We thought you said: %s, but are uncertain' % pred_val)
-            st.write('Confidence = %.1f %%' % conf) 
+            st.write('Confidence = %.2f %%' % conf) 
 
     with additional_info:
         
